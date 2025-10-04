@@ -1,0 +1,15 @@
+# Core ML framework
+tensorflow==2.16.1
+lz4
+# Data processing and numerical computing
+numpy
+blosc2==2.0.0
+
+# Cloud and storage
+boto3
+
+# Database and caching
+redis
+
+# Environment and configuration
+python-dotenv

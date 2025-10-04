@@ -1,0 +1,9 @@
+variable "environment" {}
+variable "application" {}
+variable "volume_size_combination" {}
+variable "volume_size_inference" {}
+variable "volume_size_output" {}
+variable "sendgrid_api_key" {}
+variable "twilio_account_sid" {}
+variable "twilio_auth_token" {}
+variable "twilio_sender_number" {}

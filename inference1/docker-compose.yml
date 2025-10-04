@@ -1,0 +1,40 @@
+version: '3.7'
+services:
+  predict:
+    build:
+      context: .
+    image: 'flash_inference1:latest'
+    command: python3 -u predict.py
+    volumes:
+      - '/data:/data:z'
+      - './logs:/logs:z'
+    env_file:
+      - /usr/local/inference1_methods/.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  evaluate:
+    build:
+      context: .
+    image: 'flash_inference1:latest'
+    command: python3 -u evaluate_mesh.py
+    volumes:
+      - '/data:/data:z'
+      - './evaluation_results:/evaluation_results:z'
+    env_file:
+      - /usr/local/inference1_methods/.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - evaluation  # Only runs when explicitly called
