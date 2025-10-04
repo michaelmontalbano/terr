@@ -331,16 +331,23 @@ class ModelLoader:
             except TypeError as exc:
                 message = str(exc)
                 if (
-                    "ellipsis" in message.lower()
-                    and model_type is ModelType.CONVGRU
+                    model_type is ModelType.CONVGRU
                     and h5py is not None
                     and h5py.is_hdf5(load_path)
                 ):
-                    logger.info(
-                        "Detected ellipsis objects in legacy ConvGRU checkpoint; "
-                        "rebuilding architecture and loading weights manually."
-                    )
-                    return _rebuild_and_load_convgru_h5_weights(load_path)
+                    lower = message.lower()
+                    if "ellipsis" in lower:
+                        logger.info(
+                            "Detected ellipsis objects in legacy ConvGRU checkpoint; "
+                            "rebuilding architecture and loading weights manually."
+                        )
+                        return _rebuild_and_load_convgru_h5_weights(load_path)
+                    if "__operators__.getitem" in lower or "unsupported callable" in lower:
+                        logger.info(
+                            "Detected legacy Lambda slicing callable in ConvGRU checkpoint; "
+                            "rebuilding architecture and loading weights manually."
+                        )
+                        return _rebuild_and_load_convgru_h5_weights(load_path)
                 raise
 
         try:
