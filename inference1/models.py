@@ -14,6 +14,7 @@ from typing import Dict, Optional, Tuple
 
 import tensorflow as tf
 from tensorflow import keras as tfk
+from tensorflow.keras import utils as kutils
 
 import config as cfg
 
@@ -23,6 +24,20 @@ except Exception:  # pragma: no cover - environments without h5py
     h5py = None
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Legacy TF 2.x Lambda alias --------------------------------------------------
+# =============================================================================
+
+
+@kutils.register_keras_serializable(package="Legacy")
+class _LegacySlicingOpLambda(tfk.layers.Lambda):
+    """Compatibility wrapper for ``SlicingOpLambda`` serialized in TF 2.x."""
+
+
+# Ensure the alias is globally visible even outside explicit scopes.
+kutils.get_custom_objects().setdefault("SlicingOpLambda", _LegacySlicingOpLambda)
 
 # =============================================================================
 # Conv2DTranspose legacy "groups" key patch
@@ -242,6 +257,11 @@ def _convgru_custom_objects() -> Dict[str, object]:
         "weighted_mse": loss_fn,
         "csi": csi,
         "Conv2DTranspose": _LegacyConv2DTranspose,
+        # Historic checkpoints saved Lambda layers under the now-removed
+        # ``SlicingOpLambda`` name. Mapping the alias back to the standard
+        # Lambda layer lets Keras rebuild the graph without needing the
+        # original registration from TensorFlow 2.x.
+        "SlicingOpLambda": _LegacySlicingOpLambda,
         "reshape_and_stack": reshape_and_stack,
         "slice_to_n_steps": slice_to_n_steps,
         "slice_output_shape": slice_output_shape,
